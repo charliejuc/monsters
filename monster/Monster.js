@@ -1,26 +1,40 @@
-const Health = require("./value-objects/Health");
-const Attack = require("./value-objects/Attack");
-const Defense = require("./value-objects/Defense");
+const Health = require('./valueObjects/Health');
+const Attack = require('./valueObjects/Attack');
+const Defense = require('./valueObjects/Defense');
 
 class Monster {
   // ???: id
   constructor({ health, attack, defense }) {
-    if (
-      !(
-        health instanceof Health &&
-        attack instanceof Attack &&
-        defense instanceof Defense
-      )
-    ) {
-      throw new Error("Invalid constructor params");
+    if (!(health instanceof Health && attack instanceof Attack && defense instanceof Defense)) {
+      throw new Error('Invalid constructor params');
     }
 
     this._health = health;
     this._attack = attack;
     this._defense = defense;
+
+    if (!this._areValidPoints()) {
+      throw new Error('Invalid monters points distribution');
+    }
   }
 
-  get attibutes() {
+  _areValidPoints() {
+    const values = Object.values({
+      ...this.values,
+      health: this.attributes.health.full,
+    });
+    const totalPoints = values.reduce((acc, value) => acc + value);
+
+    const average = totalPoints / values.length;
+    const minValue = Math.floor(average / 2);
+    const maxValue = Math.floor(average * 2);
+
+    const areValuesInRange = values.every((value) => value >= minValue && value <= maxValue);
+
+    return areValuesInRange;
+  }
+
+  get attributes() {
     return {
       health: this._health,
       attack: this._attack,
@@ -36,11 +50,18 @@ class Monster {
     };
   }
 
+  _calculateDamage(monster) {
+    const minDamage = 2;
+    const damage = this._attack.value - monster.values.defense / 2;
+
+    return Math.max(damage, minDamage);
+  }
+
   attack(monster) {
-    const updatedHealth = this._health.damage(monster.values.attack);
+    const updatedHealth = monster.attributes.health.damage(this._calculateDamage(monster));
 
     return new Monster({
-      ...this.attibutes,
+      ...this.attributes,
       health: updatedHealth,
     });
   }
@@ -48,8 +69,8 @@ class Monster {
 
 const monster = new Monster({
   health: new Health(500),
-  attack: new Attack(100),
-  defense: new Defense(100),
+  attack: new Attack(200),
+  defense: new Defense(200),
 });
 
 console.log(monster);
