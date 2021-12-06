@@ -1,6 +1,7 @@
 const Health = require('./valueObjects/Health');
 const Attack = require('./valueObjects/Attack');
 const Defense = require('./valueObjects/Defense');
+const { isNumber } = require('../Utils');
 
 class Monster {
   // ???: id
@@ -18,20 +19,42 @@ class Monster {
     }
   }
 
-  _areValidPoints() {
+  get totalPoints() {
+    if (isNumber(this._totalPoints)) {
+      return this._totalPoints;
+    }
+
     const values = Object.values({
       ...this.values,
       health: this.attributes.health.full,
     });
-    const totalPoints = values.reduce((acc, value) => acc + value);
 
-    const average = totalPoints / values.length;
+    this._totalPoints = values.reduce((acc, value) => acc + value);
+
+    return this._totalPoints;
+  }
+
+  _areValidPoints() {
+    const values = Object.values(this.values);
+
+    const average = this.totalPoints / values.length;
     const minValue = Math.floor(average / 2);
     const maxValue = Math.floor(average * 2);
 
     const areValuesInRange = values.every((value) => value >= minValue && value <= maxValue);
 
     return areValuesInRange;
+  }
+
+  static maxPoints(...monsters) {
+    const mockMonster = { totalPoints: 0 };
+    const monsterWithMaxPoints = monsters.reduce(
+      (monsterWithMaxPoints, monster) =>
+        monster.totalPoints > monsterWithMaxPoints.totalPoints ? monster : monsterWithMaxPoints,
+      mockMonster
+    );
+
+    return monsterWithMaxPoints === mockMonster ? null : monsterWithMaxPoints;
   }
 
   get attributes() {
@@ -73,8 +96,16 @@ const monster = new Monster({
   defense: new Defense(200),
 });
 
+const monster2 = new Monster({
+  health: new Health(400),
+  attack: new Attack(250),
+  defense: new Defense(200),
+});
+
 console.log(monster);
 
-console.log(monster.attack(monster));
+console.log(monster.attack(monster2));
+
+const maxMonster = Monster.maxPoints(monster, monster2);
 
 module.exports = Monster;
