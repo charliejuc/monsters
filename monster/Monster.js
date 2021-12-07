@@ -1,15 +1,18 @@
+const util = require('util');
+const { isNumber, keysOnly } = require('../Utils');
 const Health = require('./valueObjects/Health');
 const Attack = require('./valueObjects/Attack');
 const Defense = require('./valueObjects/Defense');
-const { isNumber } = require('../Utils');
+const Name = require('./valueObjects/Name');
 
 class Monster {
   // ???: id
-  constructor({ health, attack, defense }) {
-    if (!(health instanceof Health && attack instanceof Attack && defense instanceof Defense)) {
+  constructor({ name, health, attack, defense }) {
+    if (!(name instanceof Name && health instanceof Health && attack instanceof Attack && defense instanceof Defense)) {
       throw new Error('Invalid constructor params');
     }
 
+    this._name = name;
     this._health = health;
     this._attack = attack;
     this._defense = defense;
@@ -25,8 +28,8 @@ class Monster {
     }
 
     const values = Object.values({
-      ...this.values,
-      health: this.attributes.health.full,
+      ...this.pointsValues,
+      health: this._health.full,
     });
 
     this._totalPoints = values.reduce((acc, value) => acc + value);
@@ -35,7 +38,7 @@ class Monster {
   }
 
   _areValidPoints() {
-    const values = Object.values(this.values);
+    const values = Object.values(this.pointsValues);
 
     const average = this.totalPoints / values.length;
     const minValue = Math.floor(average / 2);
@@ -59,6 +62,7 @@ class Monster {
 
   get attributes() {
     return {
+      name: this._name,
       health: this._health,
       attack: this._attack,
       defense: this._defense,
@@ -66,6 +70,15 @@ class Monster {
   }
 
   get values() {
+    return {
+      name: this._name.value,
+      health: this._health.value,
+      attack: this._attack.value,
+      defense: this._defense.value,
+    };
+  }
+
+  get pointsValues() {
     return {
       health: this._health.value,
       attack: this._attack.value,
@@ -88,15 +101,25 @@ class Monster {
       health: updatedHealth,
     });
   }
+
+  toString() {
+    return `${this._name.value}. HP: ${this._health.value}, Attack: ${this._attack.value}, Defense: ${this._defense.value}`;
+  }
+
+  [util.inspect.custom]() {
+    return this.toString();
+  }
 }
 
 const monster = new Monster({
-  health: new Health(500),
-  attack: new Attack(200),
-  defense: new Defense(200),
+  name: new Name('Totodile'),
+  health: new Health(400),
+  attack: new Attack(210),
+  defense: new Defense(210),
 });
 
 const monster2 = new Monster({
+  name: new Name('Pikachu'),
   health: new Health(400),
   attack: new Attack(250),
   defense: new Defense(200),

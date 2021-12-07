@@ -4,6 +4,10 @@ const __isConstructable = Symbol('isHealthConstructable');
 
 class Health {
   constructor(value, _full, _isConstructable) {
+    if (!isNumber(value)) {
+      throw new Error('Health value must be a number');
+    }
+
     if (_full !== undefined && _isConstructable !== __isConstructable) {
       throw new Error('Parameter "_full" is only for private use');
     }
