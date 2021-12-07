@@ -1,7 +1,7 @@
-class Name {
+class MonsterId {
   constructor(value) {
     if (typeof value !== 'string') {
-      throw new TypeError('Name must be a string');
+      throw new TypeError('MonsterId must be a string');
     }
 
     this._value = value;
@@ -12,4 +12,4 @@ class Name {
   }
 }
 
-module.exports = Name;
+module.exports = MonsterId;

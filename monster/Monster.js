@@ -1,17 +1,28 @@
 const util = require('util');
-const { isNumber, keysOnly } = require('../Utils');
+const Big = require('big.js');
+const { isNumber } = require('../Utils');
+const MonsterId = require('./valueObjects/MonsterId');
+const Name = require('./valueObjects/Name');
 const Health = require('./valueObjects/Health');
 const Attack = require('./valueObjects/Attack');
 const Defense = require('./valueObjects/Defense');
-const Name = require('./valueObjects/Name');
 
 class Monster {
   // ???: id
-  constructor({ name, health, attack, defense }) {
-    if (!(name instanceof Name && health instanceof Health && attack instanceof Attack && defense instanceof Defense)) {
+  constructor({ id, name, health, attack, defense }) {
+    if (
+      !(
+        id instanceof MonsterId &&
+        name instanceof Name &&
+        health instanceof Health &&
+        attack instanceof Attack &&
+        defense instanceof Defense
+      )
+    ) {
       throw new Error('Invalid constructor params');
     }
 
+    this._id = id;
     this._name = name;
     this._health = health;
     this._attack = attack;
@@ -60,8 +71,33 @@ class Monster {
     return monsterWithMaxPoints === mockMonster ? null : monsterWithMaxPoints;
   }
 
+  static adjustMonstersPoints(...monsters) {
+    const monsterWithMaxPoints = Monster.maxPoints(...monsters);
+    const maxPoints = monsterWithMaxPoints.totalPoints;
+
+    return monsters.map((monster) => {
+      const pointsDiff = maxPoints - monster.totalPoints;
+      const propertiesToAdjustLength = 3;
+      const pointsPerProperty = new Big(pointsDiff).div(propertiesToAdjustLength);
+
+      const values = monster.values;
+
+      const adjustedMonster = new Monster({
+        ...monster.attributes,
+        health: new Health(Number(new Big(values.health).plus(pointsPerProperty))),
+        attack: new Attack(Number(new Big(values.attack).plus(pointsPerProperty))),
+        defense: new Defense(Number(new Big(values.defense).plus(pointsPerProperty))),
+      });
+
+      console.log(adjustedMonster);
+
+      return adjustedMonster;
+    });
+  }
+
   get attributes() {
     return {
+      id: this._id,
       name: this._name,
       health: this._health,
       attack: this._attack,
@@ -71,6 +107,7 @@ class Monster {
 
   get values() {
     return {
+      id: this._id.value,
       name: this._name.value,
       health: this._health.value,
       attack: this._attack.value,
@@ -111,24 +148,24 @@ class Monster {
   }
 }
 
-const monster = new Monster({
-  name: new Name('Totodile'),
-  health: new Health(400),
-  attack: new Attack(210),
-  defense: new Defense(210),
-});
+// const monster = new Monster({
+//   name: new Name('Totodile'),
+//   health: new Health(400),
+//   attack: new Attack(210),
+//   defense: new Defense(210),
+// });
 
-const monster2 = new Monster({
-  name: new Name('Pikachu'),
-  health: new Health(400),
-  attack: new Attack(250),
-  defense: new Defense(200),
-});
+// const monster2 = new Monster({
+//   name: new Name('Pikachu'),
+//   health: new Health(400),
+//   attack: new Attack(250),
+//   defense: new Defense(200),
+// });
 
-console.log(monster);
+// console.log(monster);
 
-console.log(monster.attack(monster2));
+// console.log(monster.attack(monster2));
 
-const maxMonster = Monster.maxPoints(monster, monster2);
+// console.log(Monster.adjustMonstersPoints(monster, monster2));
 
 module.exports = Monster;
