@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "big.js": "^6.1.1"
+    "big.js": "^6.1.1",
+    "uuid": "^8.3.2"
   }
 }

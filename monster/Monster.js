@@ -6,6 +6,7 @@ const Name = require('./valueObjects/Name');
 const Health = require('./valueObjects/Health');
 const Attack = require('./valueObjects/Attack');
 const Defense = require('./valueObjects/Defense');
+const { v4 } = require('uuid');
 
 class Monster {
   // ???: id
@@ -89,8 +90,6 @@ class Monster {
         defense: new Defense(Number(new Big(values.defense).plus(pointsPerProperty))),
       });
 
-      console.log(adjustedMonster);
-
       return adjustedMonster;
     });
   }
@@ -140,7 +139,7 @@ class Monster {
   }
 
   toString() {
-    return `${this._name.value}. HP: ${this._health.value}, Attack: ${this._attack.value}, Defense: ${this._defense.value}`;
+    return `${this._name.value}. HP: ${this._health.value}, Attack: ${this._attack.value}, Defense: ${this._defense.value}, Id: ${this._id.value}`;
   }
 
   [util.inspect.custom]() {
@@ -148,24 +147,26 @@ class Monster {
   }
 }
 
-// const monster = new Monster({
-//   name: new Name('Totodile'),
-//   health: new Health(400),
-//   attack: new Attack(210),
-//   defense: new Defense(210),
-// });
+const monster = new Monster({
+  id: new MonsterId(v4()),
+  name: new Name('Totodile'),
+  health: new Health(400),
+  attack: new Attack(210),
+  defense: new Defense(210),
+});
 
-// const monster2 = new Monster({
-//   name: new Name('Pikachu'),
-//   health: new Health(400),
-//   attack: new Attack(250),
-//   defense: new Defense(200),
-// });
+const monster2 = new Monster({
+  id: new MonsterId(v4()),
+  name: new Name('Pikachu'),
+  health: new Health(400),
+  attack: new Attack(250),
+  defense: new Defense(200),
+});
 
-// console.log(monster);
+console.log(monster);
 
-// console.log(monster.attack(monster2));
+console.log(monster.attack(monster2));
 
-// console.log(Monster.adjustMonstersPoints(monster, monster2));
+console.log(Monster.adjustMonstersPoints(monster, monster2));
 
 module.exports = Monster;
